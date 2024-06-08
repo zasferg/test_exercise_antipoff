@@ -2,7 +2,9 @@
 from rest_framework import status
 from rest_framework import generics
 from .models import QueryHistory
+from .models import Cadastral
 from .serializers import QuerySerializer
+from .serializers import HistorySerializer
 from rest_framework.response import Response
 from rest_framework.request import Request
 from rest_framework.views import APIView
@@ -12,7 +14,7 @@ import os
 from typing import List, Union
 from time import sleep
 
-from typing import List, Union
+
 
 
 class QueryPoint(APIView):
@@ -44,8 +46,8 @@ class PingPoint(APIView):
 class ResultPoint(APIView):
     def get_object(self,cad_number: str) -> Union[Response, QueryHistory]:
         try:
-            return QueryHistory.objects.filter(cadastral_number=cad_number)
-        except QueryHistory.DoesNotExist:
+            return Cadastral.objects.filter(cadastral_number=cad_number)
+        except Cadastral.DoesNotExist:
             return Response({"message": 'Данной записи не существует'},status=status.HTTP_404_NOT_FOUND)
 
     def get(self,request: Request, cad_num: str) -> Response:
@@ -54,10 +56,16 @@ class ResultPoint(APIView):
         return Response(serializer.data)
 
 class HistoryPoint(APIView):
-        def get(self,request: Request) -> Response:
-            try:
-                queryset = QueryHistory.objects.all()
-                serializer = QuerySerializer(queryset,many=True)
-                return Response(serializer.data,status=status.HTTP_200_OK)
-            except QueryHistory.DoesNotExist:
-                return Response({"message": 'В базе данных нет записей'},status=status.HTTP_404_NOT_FOUND)
+
+    def get(self, request, cad_num, format=None):
+        if not cad_num:
+            return Response({"error": "Пустой кадастровый номер"}, status=status.HTTP_400_BAD_REQUEST)
+
+        queries = QueryHistory.objects.filter(cadastral_number=cad_num)
+        
+        if not queries.exists():
+            return Response({"error": "Для этого кадастрового нмера нет истории запросов"}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = HistorySerializer(queries, many=True)
+        return Response(serializer.data)
+

@@ -6,3 +6,10 @@ class QuerySerializer(serializers.ModelSerializer):
         model = QueryHistory
         fields = '__all__'
 
+
+class HistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = QueryHistory
+        fields = ['query_date', 'query_data', 'response_status', 'response_data']
+
+

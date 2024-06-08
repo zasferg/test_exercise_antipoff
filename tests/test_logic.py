@@ -57,12 +57,11 @@ def test_response(
 
 def test_history(
         postgre_fixture,
-        add_query):
-    """ В этом тесте в бд создаюются две записи в о кадастровой информации.
-    Тест проверяет наличие этих двух записей """
-    response_from_db = get_history()
+        add_history):
+    """ В этом тесте в бд создается несколько записей данных об обращении к кадастровой информации."""
 
-    assert len(response_from_db) == 2
-    
+    result = get_history(cadastral_number="123456789:130")
+    assert len(result) == 2
+
 
 

@@ -5,6 +5,7 @@ from sqlalchemy import insert
 from sqlalchemy import delete
 from sqlalchemy import MetaData
 from .testlib.data_classes import DataModel
+from .testlib.data_classes import QueryHistory
 from datetime import datetime
 
 
@@ -26,13 +27,26 @@ def postgre_fixture() -> Generator[Engine, None, None]:
 
     yield engine
 
-    with engine.begin() as connection:
-        for table in metadata.tables.values():
-            if table.name.startswith("service_"):
-                connection.execute(table.delete())
+    # with engine.begin() as connection:
+    #     for table in metadata.tables.values():
+    #         if table.name.startswith("service_"):
+    #             connection.execute(table.delete())
 
 @contextmanager
-def add_entity_to_base(postgre_fixture: Engine, data: List[DataModel]) -> Generator[List[DataModel], None, None]:
+def add_query_to_base(postgre_fixture: Engine, data: List[DataModel]) -> Generator[List[DataModel], None, None]:
+
+    metadata = MetaData()
+    metadata.reflect(bind=postgre_fixture)
+
+    with postgre_fixture.begin() as conn:
+        for item in data:
+            values = item.model_dump()
+            sql_insert = insert(metadata.tables["service_cadastral"]).values(**values)
+            conn.execute(sql_insert)
+    yield data
+
+@contextmanager
+def add_history_to_base(postgre_fixture: Engine, data: List[DataModel]) -> Generator[List[DataModel], None, None]:
 
     metadata = MetaData()
     metadata.reflect(bind=postgre_fixture)
@@ -44,7 +58,7 @@ def add_entity_to_base(postgre_fixture: Engine, data: List[DataModel]) -> Genera
             conn.execute(sql_insert)
     yield data
 
-@pytest.fixture
+@pytest.fixture()
 def add_query(postgre_fixture: FixtureRequest) -> Generator[List[DataModel], None, None]:
         
     data = [
@@ -66,5 +80,34 @@ def add_query(postgre_fixture: FixtureRequest) -> Generator[List[DataModel], Non
         )
     ]
 
-    with add_entity_to_base(postgre_fixture=postgre_fixture,data=data) as entity:
+    with add_query_to_base(postgre_fixture=postgre_fixture,data=data) as entity:
+        yield entity
+
+@pytest.fixture()
+def add_history(postgre_fixture:FixtureRequest)-> Generator[List[DataModel], None, None]:
+    data = [
+        QueryHistory(
+        cadastral_number="123456789:130",
+        query_date=datetime.now(),
+        query_data="request_data_130",
+        response_status= True,
+        response_data= "response_data_130_True",
+        
+        ),
+        QueryHistory(
+        cadastral_number="123456789:130",
+        query_date=datetime.now(),
+        query_data="request_data_131",
+        response_status= False,
+        response_data= "response_data_130_False",
+        ),
+        QueryHistory(
+        cadastral_number="123456789:131",
+        query_date=datetime.now(),
+        query_data="request_data_131",
+        response_status= False,
+        response_data= "response_data_131_False", 
+        )
+    ]
+    with add_history_to_base(postgre_fixture=postgre_fixture,data=data) as entity:
         yield entity

@@ -7,8 +7,8 @@ def set_query(data: dict)-> requests.models.Response:
     return rs
 
 
-def get_history()-> dict:
-    rs = requests.get(f"{host}/history/")
+def get_history(cadastral_number:str)-> dict:
+    rs = requests.get(f"{host}/history/{cadastral_number}")
     return rs.json()
 
 
