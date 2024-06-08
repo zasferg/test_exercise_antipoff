@@ -1,4 +1,4 @@
 .pytest_cache
-.env.sample
+.env
 venv
 __pycache__/
