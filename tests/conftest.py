@@ -17,7 +17,7 @@ from sqlalchemy.engine.base import Engine
 from pytest import FixtureRequest
 
 @pytest.fixture(scope="function")
-def postgre_fixture() -> Generator[Engine]:
+def postgre_fixture() -> Generator[Engine, None, None]:
     database_uri = "postgresql://dbuser:dbpass@localhost:5432/dbname"
 
     engine = create_engine(database_uri)
@@ -32,7 +32,7 @@ def postgre_fixture() -> Generator[Engine]:
                 connection.execute(table.delete())
 
 @contextmanager
-def add_entity_to_base(postgre_fixture: Engine, data: List[DataModel]) -> Generator[List[DataModel]]:
+def add_entity_to_base(postgre_fixture: Engine, data: List[DataModel]) -> Generator[List[DataModel], None, None]:
 
     metadata = MetaData()
     metadata.reflect(bind=postgre_fixture)
@@ -45,7 +45,7 @@ def add_entity_to_base(postgre_fixture: Engine, data: List[DataModel]) -> Genera
     yield data
 
 @pytest.fixture
-def add_query(postgre_fixture: FixtureRequest) -> Generator[List[DataModel]]:
+def add_query(postgre_fixture: FixtureRequest) -> Generator[List[DataModel], None, None]:
         
     data = [
         DataModel(
