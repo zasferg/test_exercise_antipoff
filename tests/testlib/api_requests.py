@@ -7,13 +7,13 @@ def set_query(data: dict)-> requests.models.Response:
     return rs
 
 
-def get_history(carastral_id:str)-> dict:
-    rs = requests.get(f"{host}/history/{carastral_id}")
+def get_history()-> dict:
+    rs = requests.get(f"{host}/history/")
     return rs.json()
 
 
-def get_result(id:int)-> dict:
-    rs = requests.get(f"{host}/result/{id}")
+def get_result(cadastral_number:str)-> dict:
+    rs = requests.get(f"{host}/result/{cadastral_number}")
     return rs.json()
 
 
