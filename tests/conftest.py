@@ -8,9 +8,16 @@ from .testlib.data_classes import DataModel
 from datetime import datetime
 
 
+from sqlalchemy import create_engine, MetaData
+from sqlalchemy.sql import insert
+from contextlib import contextmanager
+from datetime import datetime
+from typing import Generator, List
+from sqlalchemy.engine.base import Engine
+from pytest import FixtureRequest
 
 @pytest.fixture(scope="function")
-def postgre_fixture():
+def postgre_fixture() -> Generator[Engine]:
     database_uri = "postgresql://dbuser:dbpass@localhost:5432/dbname"
 
     engine = create_engine(database_uri)
@@ -24,9 +31,8 @@ def postgre_fixture():
             if table.name.startswith("service_"):
                 connection.execute(table.delete())
 
-
 @contextmanager
-def add_entity_to_base(postgre_fixture, data):
+def add_entity_to_base(postgre_fixture: Engine, data: List[DataModel]) -> Generator[List[DataModel]]:
 
     metadata = MetaData()
     metadata.reflect(bind=postgre_fixture)
@@ -38,9 +44,8 @@ def add_entity_to_base(postgre_fixture, data):
             conn.execute(sql_insert)
     yield data
 
-
 @pytest.fixture
-def add_query(postgre_fixture):
+def add_query(postgre_fixture: FixtureRequest) -> Generator[List[DataModel]]:
         
     data = [
         DataModel(
@@ -63,5 +68,3 @@ def add_query(postgre_fixture):
 
     with add_entity_to_base(postgre_fixture=postgre_fixture,data=data) as entity:
         yield entity
-
-    
