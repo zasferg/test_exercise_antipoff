@@ -7,6 +7,7 @@ import datetime
 from datetime import date ,time, timezone
 import pytz
 
+
 def get_test_time():
 
     testtime = datetime.datetime.combine(
@@ -18,7 +19,7 @@ def get_test_time():
 def test_query(
     postgre_fixture
     ):
-
+    """Данный тест проверяет правильность ввода кадастровых данных"""
     test_time = get_test_time()
     data = {
         "id":1,
@@ -33,30 +34,35 @@ def test_query(
     assert result.status_code == 200
 
 
-def test_response(
-        postgre_fixture,
-        add_query
-    ):
-    response_from_db = get_result(id = add_query.id)
-    result_returned_drom_db = response_from_db["result_field"]
 
-    assert result_returned_drom_db == add_query.result
 
 
 def test_ping():
-    
+    """Тест проверки ответа от сервера"""
     response_from_db = get_ping()
     assert response_from_db['status'] == 'Сервер работает'
 
 
-def test_history(
+def test_response(
         postgre_fixture,
         add_query
     ):
-    response_from_db = get_history(carastral_id=add_query.cadastral_number)
+    """Этот тест проверяет наличие конеретной кадастровой записи в базе данных"""
+
+    expected_cadastral_number = "123456789"
+    response_from_db = get_result(cadastral_number=expected_cadastral_number)
     cadastral_number_from_db = response_from_db[0]["cadastral_number"]
 
-    assert  cadastral_number_from_db == add_query.cadastral_number
+    assert  cadastral_number_from_db == expected_cadastral_number
+
+def test_history(
+        postgre_fixture,
+        add_query):
+    """ В этом тесте в бд создаюются две записи в о кадастровой информации.
+    Тест проверяет наличие этих двух записей """
+    response_from_db = get_history()
+
+    assert len(response_from_db) == 2
     
 
 

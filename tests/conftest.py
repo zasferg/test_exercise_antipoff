@@ -32,23 +32,34 @@ def add_entity_to_base(postgre_fixture, data):
     metadata.reflect(bind=postgre_fixture)
 
     with postgre_fixture.begin() as conn:
-        values = data.model_dump()
-        sql_insert = insert(metadata.tables["service_queryhistory"]).values(**values)
-        conn.execute(sql_insert)
+        for item in data:
+            values = item.model_dump()
+            sql_insert = insert(metadata.tables["service_queryhistory"]).values(**values)
+            conn.execute(sql_insert)
     yield data
 
 
 @pytest.fixture
 def add_query(postgre_fixture):
         
-    data = DataModel(
+    data = [
+        DataModel(
         id=1,
         cadastral_number="123456789",
         latitude=50.4501,
         longitude=30.5234,
         result=True,
         query_time=datetime.now()
-    )
+    ),
+        DataModel(
+        id=2,
+        cadastral_number="987654321",
+        latitude=11.1111,
+        longitude=22.222,
+        result=False,
+        query_time=datetime.now()
+        )
+    ]
 
     with add_entity_to_base(postgre_fixture=postgre_fixture,data=data) as entity:
         yield entity
