@@ -2,30 +2,57 @@ version: '3.8'
 
 services:
   db:
-    image: postgres
-    environment:
-      POSTGRES_DB: dbname
-      POSTGRES_USER: dbuser
-      POSTGRES_PASSWORD: dbpass
+    image: postgres:latest
+    env_file:
+      .env
     ports:
       - "5432:5432"
     networks:
       - my-net
 
-
+  db_external:
+    image: postgres
+    environment:
+      POSTGRES_DB: "dbname"
+      POSTGRES_USER: "dbuser"
+      POSTGRES_PASSWORD: "dbpass"
+    expose:
+      - "5433"
+    ports:
+      - "5433:5433"
+    command: -p 5433
+    networks:
+      - my-net
 
   web:
-    build: 
-      context: .
+    build: ./service
     user: "myuser"
     volumes:
-      - ./app:/app
+      - ./service:/service
     command: >
-      sh -c "python manage.py runserver 0.0.0.0:8000"
+      sh -c " python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    expose:
+      - '8000'
     ports:
-      - "8000:8000"
+      - '8000:8000'
     depends_on:
       - db
+    networks:
+      - my-net
+
+      
+  external_app:
+    build: ./external_server
+    volumes:
+      - ./external_server:/external_server/server_app
+    command: >
+      sh -c " python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8001"
+    expose:
+      - "8001"
+    ports:
+      - '8001:8001'
+    depends_on:
+      - db_external
     networks:
       - my-net
 networks:

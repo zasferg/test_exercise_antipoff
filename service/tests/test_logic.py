@@ -17,7 +17,8 @@ def get_test_time():
 
 
 def test_query(
-    postgre_fixture
+    postgre_fixture,
+    postgre_fixture_external
     ):
     """Данный тест проверяет правильность ввода кадастровых данных"""
     test_time = get_test_time()
@@ -26,7 +27,7 @@ def test_query(
         "cadastral_number": "123456789",
         "latitude": 50.456,
         "longitude": 30.523,
-        "result": True,
+        # "result": True,
         "query_time": test_time
     }
 
@@ -40,6 +41,7 @@ def test_query(
 def test_ping():
     """Тест проверки ответа от сервера"""
     response_from_db = get_ping()
+    print(response_from_db)
     assert response_from_db['status'] == 'Сервер работает'
 
 

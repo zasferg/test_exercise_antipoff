@@ -27,10 +27,25 @@ def postgre_fixture() -> Generator[Engine, None, None]:
 
     yield engine
 
-    # with engine.begin() as connection:
-    #     for table in metadata.tables.values():
-    #         if table.name.startswith("service_"):
-    #             connection.execute(table.delete())
+    with engine.begin() as connection:
+        for table in metadata.tables.values():
+            if table.name.startswith("service_"):
+                connection.execute(table.delete())
+
+@pytest.fixture(scope="function")
+def postgre_fixture_external() -> Generator[Engine, None, None]:
+    database_uri = "postgresql://dbuser:dbpass@localhost:5433/dbname"
+
+    engine = create_engine(database_uri)
+    metadata = MetaData()
+    metadata.reflect(bind=engine)
+
+    yield engine
+
+    with engine.begin() as connection:
+        for table in metadata.tables.values():
+            if table.name.startswith("service_"):
+                connection.execute(table.delete())
 
 @contextmanager
 def add_query_to_base(postgre_fixture: Engine, data: List[DataModel]) -> Generator[List[DataModel], None, None]:

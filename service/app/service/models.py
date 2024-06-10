@@ -6,8 +6,8 @@ from django.db import models
 class Cadastral(models.Model):
     cadastral_number = models.CharField(max_length=255,verbose_name="Кадастровый номер")
     latitude = models.FloatField(verbose_name="Широта")
-    longitude = models.FloatField(verbose_name="Долгота")
-    result = models.BooleanField(verbose_name="Результат")
+    longitude = models.CharField(verbose_name="Долгота")
+    result = models.CharField(verbose_name="Результат")
     query_time = models.DateTimeField(auto_now_add=True,verbose_name="Время отправки запроса")
 
     class Meta:

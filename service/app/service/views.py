@@ -1,5 +1,6 @@
 
-from rest_framework import status
+from rest_framework import status 
+from rest_framework.decorators import api_view
 from rest_framework import generics
 from .models import QueryHistory
 from .models import Cadastral
@@ -14,34 +15,50 @@ import os
 from typing import List, Union
 from time import sleep
 
-
+EXTERNAL_SERVER_URL = "http://127.0.0.1:8001"
 
 
 class QueryPoint(APIView):
-    @staticmethod
-    def emulate_external_request() -> None:
-        sleep(randint(1, 60))
-    
+
     def post(self, request: Request) -> Response:
         if not request.data:
             return Response({"message": "Нет данных в запросе"}, status=status.HTTP_400_BAD_REQUEST)
+        
+
+        response = requests.post(url="http://127.0.0.1:8001/server/",data=request.data)
+        message = response.json()
+        print(message)
+        request.data["result"] = message["status"]
         serializer = QuerySerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            self.emulate_external_request()
             return Response({"message": "Запрос отправлен"},status=status.HTTP_200_OK)
         return Response({"message": "Произошла ошибка", "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+    
 
-class PingPoint(APIView):
-    @staticmethod
-    def get_api_response() -> int:
-        return requests.get('http://127.0.0.1:8000/openapi').status_code
+# class PingPoint(APIView):
+#     def get(self,request:Request) -> int:
+#             response = requests.get(url="http://127.0.0.1:8001/",timeout=60).status_code
+#             if response < 500: 
+#                 return Response({"status": "Сервер работает"}, status=response)
+#             else: 
+#                 return Response({"status": "Сервер не работает"}, status=response)
+#         # except requests.exceptions.Timeout:                                
+#         #     return Response({'message': 'Время ожидания истекло'})             
 
-    def get(self, format=None) -> Response:
-        if not self.get_api_response() > 500 : 
-            return Response({"status": "Сервер работает"}, status=self.get_api_response())
+# def get_response():
+#     response = requests.get(url="http://external_app:8000/",timeout=60)
+#     print(response)
+#     return response
+
+response = requests.get(url="http://127.0.0.1:8001/server/")
+@api_view(['GET'])
+def PingPoint(request):
+    if request.method == 'GET':
+        if response.status_code < 500: 
+            return Response({"status": "Сервер работает"}, status=response.status_code)
         else: 
-            return Response({"status": "Сервер не работает"}, status=self.get_api_response())
+            return Response({"status": "Сервер не работает"}, status=response.status_code)
 
 class ResultPoint(APIView):
     def get_object(self,cad_number: str) -> Union[Response, QueryHistory]:
