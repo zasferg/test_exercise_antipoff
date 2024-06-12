@@ -37,8 +37,6 @@ class QueryPoint(APIView):
         if serializer.is_valid() and history_serializer.is_valid():
             serializer.save()
             history_serializer.save()
-            print(serializer.data)
-            print(history_serializer.data)
             return Response({"message": "Ответ сeрвера:"f'{serializer.data["result"]}'},status=status.HTTP_200_OK)
 
 class PingPoint(APIView):
