@@ -12,7 +12,7 @@ class QueryHistoryAdmin(admin.ModelAdmin):
 
 @admin.register(QueryHistory)
 class QueryHistoryAdmin(admin.ModelAdmin):
-    list_display = ('query_date', 'query_data', 'response_status', 'response_data')
+    list_display = ('cadastral_number','query_date', 'response_status', 'result')
     list_filter = ("cadastral_number",)
     search_fields = ("cadastral_number__startswith",)
 

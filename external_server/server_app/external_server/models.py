@@ -11,3 +11,4 @@ class ExrernalServerCadastral(models.Model):
     class Meta:
         verbose_name = "Кадастровая информация"
         verbose_name_plural = "Кадастровая информация"
+

@@ -5,7 +5,7 @@ from .testlib.api_requests import get_result
 
 import datetime
 from datetime import date ,time, timezone
-import pytz
+
 
 
 def get_test_time():
@@ -61,7 +61,6 @@ def test_history(
         postgre_fixture,
         add_history):
     """ В этом тесте в бд создается несколько записей данных об обращении к кадастровой информации."""
-
     result = get_history(cadastral_number="123456789:130")
     assert len(result) == 2
 

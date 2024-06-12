@@ -17,9 +17,8 @@ class DataModel(BaseModel):
 class QueryHistory(BaseModel):
     cadastral_number: str
     query_date: datetime
-    query_data: Optional[str]
-    response_status: Optional[bool]
-    response_data: Optional[str]
+    response_status: int
+    result: bool
 
     class Config:
         from_attributes = True

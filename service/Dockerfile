@@ -16,7 +16,7 @@ RUN adduser --disabled-password myuser
 RUN chown -R myuser:myuser /app
 USER myuser
 
-CMD ["sh", "run_dj_script.sh"]
+
 
 
 

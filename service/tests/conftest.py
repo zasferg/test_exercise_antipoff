@@ -44,7 +44,7 @@ def postgre_fixture_external() -> Generator[Engine, None, None]:
 
     with engine.begin() as connection:
         for table in metadata.tables.values():
-            if table.name.startswith("service_"):
+            if table.name.startswith("external_"):
                 connection.execute(table.delete())
 
 @contextmanager
@@ -104,24 +104,21 @@ def add_history(postgre_fixture:FixtureRequest)-> Generator[List[DataModel], Non
         QueryHistory(
         cadastral_number="123456789:130",
         query_date=datetime.now(),
-        query_data="request_data_130",
-        response_status= True,
-        response_data= "response_data_130_True",
+        response_status= 201,
+        result = True,
         
         ),
         QueryHistory(
         cadastral_number="123456789:130",
         query_date=datetime.now(),
-        query_data="request_data_131",
-        response_status= False,
-        response_data= "response_data_130_False",
+        response_status= 500,
+        result= False,
         ),
         QueryHistory(
         cadastral_number="123456789:131",
         query_date=datetime.now(),
-        query_data="request_data_131",
-        response_status= False,
-        response_data= "response_data_131_False", 
+        response_status= 201,
+        result= True, 
         )
     ]
     with add_history_to_base(postgre_fixture=postgre_fixture,data=data) as entity:

@@ -15,52 +15,47 @@ import os
 from typing import List, Union
 from time import sleep
 
-EXTERNAL_SERVER_URL = "http://127.0.0.1:8001"
+# Это IP внешнего сервера, которое находится в контейнере externall_app
+EXTERNAL_SERVER_URL = "http://172.19.0.3:8001"
 
 
 class QueryPoint(APIView):
-
-    def post(self, request: Request) -> Response:
+    """Здесь мы отправляем данные на внешний сервер. Внешним сервером у нас является приложение в контейнере external_app.
+    Так же добавляется запись о запросе в инсторию запросов"""
+    def post(self, request: Request)-> Response:
         if not request.data:
             return Response({"message": "Нет данных в запросе"}, status=status.HTTP_400_BAD_REQUEST)
-        
-
-        response = requests.post(url="http://127.0.0.1:8001/server/",data=request.data)
+        response = requests.post(url=f"{EXTERNAL_SERVER_URL}/server/",data=request.data)
         message = response.json()
-        print(message)
-        request.data["result"] = message["status"]
+        request.data["result"] = message["message"]
         serializer = QuerySerializer(data=request.data)
-        if serializer.is_valid():
+        history_serializer = HistorySerializer(data={"cadastral_number":request.data["cadastral_number"],
+                                                     "query_date" : request.data["query_time"],
+                                                     "response_status":response.status_code,
+                                                     "result":message["message"],
+                                                     })
+        if serializer.is_valid() and history_serializer.is_valid():
             serializer.save()
-            return Response({"message": "Запрос отправлен"},status=status.HTTP_200_OK)
-        return Response({"message": "Произошла ошибка", "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-    
+            history_serializer.save()
+            print(serializer.data)
+            print(history_serializer.data)
+            return Response({"message": "Ответ сeрвера:"f'{serializer.data["result"]}'},status=status.HTTP_200_OK)
 
-# class PingPoint(APIView):
-#     def get(self,request:Request) -> int:
-#             response = requests.get(url="http://127.0.0.1:8001/",timeout=60).status_code
-#             if response < 500: 
-#                 return Response({"status": "Сервер работает"}, status=response)
-#             else: 
-#                 return Response({"status": "Сервер не работает"}, status=response)
-#         # except requests.exceptions.Timeout:                                
-#         #     return Response({'message': 'Время ожидания истекло'})             
+class PingPoint(APIView):
+    """Здесь мы тестируем пинг нашего внешнего сервера"""
+    def get(self,request:Request) -> Response:
+        try:
+            response = requests.get(url=f"{EXTERNAL_SERVER_URL}/server/",timeout=60).status_code
+            if response < 500: 
+                return Response({"status": "Сервер работает"}, status=response)
+            else: 
+                return Response({"status": "Сервер не работает"}, status=response)
+        except requests.exceptions.Timeout:                                
+            return Response({'message': 'Время ожидания истекло'})             
 
-# def get_response():
-#     response = requests.get(url="http://external_app:8000/",timeout=60)
-#     print(response)
-#     return response
-
-response = requests.get(url="http://127.0.0.1:8001/server/")
-@api_view(['GET'])
-def PingPoint(request):
-    if request.method == 'GET':
-        if response.status_code < 500: 
-            return Response({"status": "Сервер работает"}, status=response.status_code)
-        else: 
-            return Response({"status": "Сервер не работает"}, status=response.status_code)
 
 class ResultPoint(APIView):
+    """Здесь мы получаем данные по кадастровому номеру """
     def get_object(self,cad_number: str) -> Union[Response, QueryHistory]:
         try:
             return Cadastral.objects.filter(cadastral_number=cad_number)
@@ -73,7 +68,7 @@ class ResultPoint(APIView):
         return Response(serializer.data)
 
 class HistoryPoint(APIView):
-
+    """Зесь мы получаем историю апросов"""
     def get(self, request, cad_num, format=None):
         if not cad_num:
             return Response({"error": "Пустой кадастровый номер"}, status=status.HTTP_400_BAD_REQUEST)
