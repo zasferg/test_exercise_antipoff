@@ -7,19 +7,26 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='QueryHistory',
+            name="QueryHistory",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('cadastral_number', models.CharField(max_length=255)),
-                ('latitude', models.FloatField()),
-                ('longitude', models.FloatField()),
-                ('result', models.BooleanField()),
-                ('query_time', models.DateTimeField(auto_now_add=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("cadastral_number", models.CharField(max_length=255)),
+                ("latitude", models.FloatField()),
+                ("longitude", models.FloatField()),
+                ("result", models.BooleanField()),
+                ("query_time", models.DateTimeField(auto_now_add=True)),
             ],
         ),
     ]

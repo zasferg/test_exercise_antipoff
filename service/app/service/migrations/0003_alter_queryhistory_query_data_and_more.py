@@ -6,23 +6,29 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('service', '0002_cadastral_remove_queryhistory_latitude_and_more'),
+        ("service", "0002_cadastral_remove_queryhistory_latitude_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='queryhistory',
-            name='query_data',
-            field=models.CharField(max_length=100, null=True, verbose_name='Данные запроса'),
+            model_name="queryhistory",
+            name="query_data",
+            field=models.CharField(
+                max_length=100, null=True, verbose_name="Данные запроса"
+            ),
         ),
         migrations.AlterField(
-            model_name='queryhistory',
-            name='query_date',
-            field=models.DateTimeField(default='2024-06-08T12:57:51.827978', verbose_name='Дата запроса'),
+            model_name="queryhistory",
+            name="query_date",
+            field=models.DateTimeField(
+                default="2024-06-08T12:57:51.827978", verbose_name="Дата запроса"
+            ),
         ),
         migrations.AlterField(
-            model_name='queryhistory',
-            name='response_data',
-            field=models.CharField(max_length=100, null=True, verbose_name='Данные ответа'),
+            model_name="queryhistory",
+            name="response_data",
+            field=models.CharField(
+                max_length=100, null=True, verbose_name="Данные ответа"
+            ),
         ),
     ]

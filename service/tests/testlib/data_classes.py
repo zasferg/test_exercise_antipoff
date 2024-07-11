@@ -2,8 +2,9 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional, Dict
 
+
 class DataModel(BaseModel):
-    id:int
+    id: int
     cadastral_number: str
     latitude: float
     longitude: float

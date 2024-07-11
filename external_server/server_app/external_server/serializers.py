@@ -6,4 +6,4 @@ class ExternalServerCadastralSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ExrernalServerCadastral
-        fields = '__all__'
+        fields = "__all__"

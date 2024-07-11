@@ -2,21 +2,25 @@ import requests
 
 host = "http://localhost:8000"
 
-def set_query(data: dict)-> requests.models.Response:
-    rs = requests.post(f"{host}/query/",json=data,)
+
+def set_query(data: dict) -> requests.models.Response:
+    rs = requests.post(
+        f"{host}/query/",
+        json=data,
+    )
     return rs
 
 
-def get_history(cadastral_number:str)-> dict:
+def get_history(cadastral_number: str) -> dict:
     rs = requests.get(f"{host}/history/{cadastral_number}")
     return rs.json()
 
 
-def get_result(cadastral_number:str)-> dict:
+def get_result(cadastral_number: str) -> dict:
     rs = requests.get(f"{host}/result/{cadastral_number}")
     return rs.json()
 
 
-def get_ping()-> dict:
+def get_ping() -> dict:
     rs = requests.get(f"{host}/ping/")
     return rs.json()
