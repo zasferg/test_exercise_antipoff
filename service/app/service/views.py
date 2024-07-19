@@ -13,6 +13,8 @@ import requests
 import os
 from typing import List, Union
 from time import sleep
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 # Это IP внешнего сервера, которое находится в контейнере externall_app
 EXTERNAL_SERVER_URL = "http://172.19.0.3:8001"
@@ -22,6 +24,9 @@ class QueryPoint(APIView):
     """Здесь мы отправляем данные на внешний сервер. Внешним сервером у нас является приложение в контейнере external_app.
     Так же добавляется запись о запросе в инсторию запросов"""
 
+    @swagger_auto_schema(
+        request_body=QuerySerializer,
+    )
     def post(self, request: Request) -> Response:
         if not request.data:
             return Response(
@@ -30,20 +35,25 @@ class QueryPoint(APIView):
         response = requests.post(
             url=f"{EXTERNAL_SERVER_URL}/server/", data=request.data
         )
-        message = response.json()
-        request.data["result"] = message["message"]
+        response_from_external_server = response.json()
+        data_from_server = response_from_external_server["data"]
+        request.data["result"] = response_from_external_server["message"]
         serializer = QuerySerializer(data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+
         history_serializer = HistorySerializer(
             data={
-                "cadastral_number": request.data["cadastral_number"],
-                "query_date": request.data["query_time"],
+                "cadastral_number": serializer.data["cadastral_number"],
+                "query_date": serializer.data["query_time"],
                 "response_status": response.status_code,
-                "result": message["message"],
+                "result": response_from_external_server["message"],
             }
         )
-        if serializer.is_valid() and history_serializer.is_valid():
-            serializer.save()
+        if history_serializer.is_valid():
             history_serializer.save()
+
             return Response(
                 {"message": "Ответ сeрвера:" f'{serializer.data["result"]}'},
                 status=status.HTTP_200_OK,
